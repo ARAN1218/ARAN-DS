@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <p>Get started to input a CSV file and push "Display" button.</p>
+    <div id="fileinput"></div>
+    <div id="display"></div>
+    <div id="table"></div> 
+    <hr />
+
+    <br><br><br>
+
+    <!-- Describe -->
+    <h2 class="graph_title">Describe</h2>
+    <div id="describe"></div>
+    <div id="table_describe"></div>
+    <hr />
+
+    <br><br><br>
+
+    <!-- Groupby -->
+    <h2 class="graph_title">Groupby</h2>
+    <p class="input-title">group column</p><select id="group_column" size="5"></select>
+    <p class="input-title">agg column</p><select id="agg_column" size="5" multiple></select>
+    <div id="groupby"></div>
+    <div id="table_groupby"></div>
+    <hr />
+
+    <br><br><br>
+
+    <!-- Pie chart -->
+    <h2 class="graph_title">Pie Chart</h2>
+    <p class="input-title">pie target column</p><select id="pie_column"></select>
+    <div id="piechart"></div>
+    <div id="piechart_show"></div> 
+
+    <br><br><br>
+
+    <!-- Histogram -->
+    <h2 class="graph_title">Histogram</h2>
+    <p class="input-title">histo target column</p><select id="histo_column" size="5" multiple></select>
+    <p class="input-title">bins</p><input type="number" id="bins">
+    <p class="input-title">cumulative</p>
+    <select id="cumulative">
+        <option selected>Normal</option>
+        <option>Cumulative</option>
+    </select>
+    <div id="histogram"></div>
+    <div id="histogram_show"></div>
+
+    <br><br><br>
+
+    <!-- Q-Q plot -->
+    <h2 class="graph_title">Q-Q Plot</h2>
+    <p class="input-title">Q-Q target column</p><select id="qq_column"></select>
+    <div id="qqplot"></div>
+    <div id="qqplot_show"></div>
+
+    <br><br><br>
+
+    <!-- Line plot -->
+    <h2 class="graph_title">Line Plot</h2>
+    <p class="input-title">line_x</p><select id="line_x"></select>
+    <p class="input-title">line_y</p><select id="line_y" size="5" multiple></select>
+    <div id="lineplot"></div>
+    <div id="lineplot_show"></div>
+
+    <br><br><br>
+
+    <!-- Scatter plot -->
+    <h2 class="graph_title">Scatter Plot</h2>
+    <p class="input-title">scatter_x</p><select id="scatter_x"></select>
+    <p class="input-title">scatter_y</p><select id="scatter_y"></select>
+    <div id="scatter"></div>
+    <div id="scatterplot_show"></div>
+
+    <br><br><br>
+
+    <!-- Box plot -->
+    <h2 class="graph_title">Box Plot</h2>
+    <p class="input-title">box target column</p><select id="box_column" size="5" multiple></select>
+    <div id="boxplot"></div>
+    <div id="boxplot_show"></div>
+
+    <br><br><br>
+
+    <!-- Violin plot -->
+    <h2 class="graph_title">Violin Plot</h2>
+    <p class="input-title">violin target column</p><select id="violin_column" size="5" multiple></select>
+    <div id="violinplot"></div>
+    <div id="violinplot_show"></div>
+    
+<py-script>
+import asyncio
+import panel as pn
+import pandas as pd
+from panel.io.pyodide import show
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.stats as st
+
+df = pd.DataFrame()
+
+group_column = document.querySelector("#group_column")
+agg_column = document.querySelector("#agg_column")
+pie_column = document.querySelector("#pie_column")
+histo_column = document.querySelector("#histo_column")
+qq_column = document.querySelector("#qq_column")
+scatter_x = document.querySelector("#scatter_x")
+scatter_y = document.querySelector("#scatter_y")
+line_x = document.querySelector("#line_x")
+line_y = document.querySelector("#line_y")
+box_column = document.querySelector("#box_column")
+violin_column = document.querySelector("#violin_column")
+
+def process_file(event):
+    global df
+    if fileInput.value is not None:
+        df = pd.read_csv(io.BytesIO(fileInput.value))
+        table.value = df
+        document.getElementById('table').style.display = 'block'
+
+        # columns preprocessing
+        while pie_column.childNodes.length > 0:
+            group_column.removeChild(group_column.firstChild)
+            agg_column.removeChild(agg_column.firstChild)
+            pie_column.removeChild(pie_column.firstChild)
+            histo_column.removeChild(histo_column.firstChild)
+            qq_column.removeChild(qq_column.firstChild)
+            scatter_x.removeChild(scatter_x.firstChild)
+            scatter_y.removeChild(scatter_y.firstChild)
+            line_x.removeChild(line_x.firstChild)
+            line_y.removeChild(line_y.firstChild)
+            box_column.removeChild(box_column.firstChild)
+            violin_column.removeChild(violin_column.firstChild)
+
+        document.querySelector("#bins").value = 1+int(np.log2(len(df)))
+
+        for column in df.columns:
+            tmp_group = document.createElement("option")
+            tmp_agg = document.createElement("option")
+            tmp_pie = document.createElement("option")
+            tmp_histo = document.createElement("option")
+            tmp_qq = document.createElement("option")
+            tmp_scatter_x = document.createElement("option")
+            tmp_scatter_y = document.createElement("option")
+            tmp_line_x = document.createElement("option")
+            tmp_line_y = document.createElement("option")
+            tmp_box = document.createElement("option")
+            tmp_violin = document.createElement("option")
+
+            tmp_group.textContent = column
+            tmp_agg.textContent = column
+            tmp_pie.textContent = column
+            tmp_histo.textContent = column
+            tmp_qq.textContent = column
+            tmp_scatter_x.textContent = column
+            tmp_scatter_y.textContent = column
+            tmp_line_x.textContent = column
+            tmp_line_y.textContent = column
+            tmp_box.textContent = column
+            tmp_violin.textContent = column
+
+            group_column.appendChild(tmp_group)
+            agg_column.appendChild(tmp_agg)
+            pie_column.appendChild(tmp_pie)
+            histo_column.appendChild(tmp_histo)
+            qq_column.appendChild(tmp_qq)
+            scatter_x.appendChild(tmp_scatter_x)
+            scatter_y.appendChild(tmp_scatter_y)
+            line_x.appendChild(tmp_line_x)
+            line_y.appendChild(tmp_line_y)
+            box_column.appendChild(tmp_box)
+            violin_column.appendChild(tmp_violin)
+
+
+def describe(event):
+    df_describe = df.describe(include="all").reset_index()
+    table_describe.value = df_describe
+    document.getElementById('table_describe').style.display = 'block'
+
+def groupby(event):
+    group, agg = [], []
+    selectOptions_g = group_column.selectedOptions
+    for i in range(selectOptions_g.length):
+        group.append(selectOptions_g[i].value)
+    
+    selectOptions_a = agg_column.selectedOptions
+    for i in range(selectOptions_a.length):
+        agg.append(selectOptions_a[i].value)
+    
+    df_groupby = df.groupby(group).describe()[agg].reset_index()
+    df_groupby = df_groupby.set_axis([i+'_'+j for i,j in df_groupby.columns], axis=1)
+    table_groupby.value = df_groupby
+    document.getElementById('table_groupby').style.display = 'block'
+
+def scatter(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    x = Element('scatter_x').element.value
+    y = Element('scatter_y').element.value
+    pearson = df[[x,y]].corr().iloc[0,1]
+    spearman = df[[x,y]].corr('spearman').iloc[0,1]
+    kendall = df[[x,y]].corr('kendall').iloc[0,1]
+    ax.scatter(df[x], df[y])
+    ax.set(xlabel=x, ylabel=y, title=f'Scatter plot(P:{pearson:.2f},S:{spearman:.2f},K:{kendall:.2f})')
+    ax.legend()
+    ax.grid()
+    pyscript.write('scatterplot_show', fig)
+
+def piechart(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    column = Element('pie_column').element.value
+    df_pie = pd.DataFrame(df[column].value_counts())
+    ax.pie(df_pie[column], labels=df_pie.index, counterclock=False, startangle=90, autopct="%.1f%%", pctdistance=0.7)
+    ax.set(title='Pie chart')
+    ax.legend(loc='center left', bbox_to_anchor=(0.9,0.5))
+    pyscript.write('piechart_show', fig)
+
+def histogram(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    contents, labels = [], []
+    selectOptions = histo_column.selectedOptions
+    for i in range(selectOptions.length):
+        labels.append(selectOptions[i].value)
+    for label in labels:
+        contents.append(df[label])
+    cumulative = False if Element('cumulative').element.value == 'Normal' else True
+    bins = int(Element('bins').element.value)
+    ax.hist(contents, label=labels, bins=bins, cumulative=cumulative)
+    ax.set(title=f'Histogram(bins:{bins})')
+    ax.legend()
+    pyscript.write('histogram_show', fig)
+
+def boxplot(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    contents, labels = [], []
+    selectOptions = box_column.selectedOptions
+    for i in range(selectOptions.length):
+        labels.append(selectOptions[i].value)
+    for label in labels:
+        contents.append(df[label])
+    ax.boxplot(contents, labels=labels)
+    #ax.set_xticklabels(labels, rotation=45) # なぜか画面が拡張されない
+    ax.set(title='Box plot')
+    ax.legend()
+    pyscript.write('boxplot_show', fig)
+
+def violinplot(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    contents, labels = [], []
+    selectOptions = violin_column.selectedOptions
+    for i in range(selectOptions.length):
+        labels.append(selectOptions[i].value)
+    for label in labels:
+        contents.append(df[label])
+    pos = [i for i in range(0, len(labels))]
+    ax.violinplot(contents, pos, showmeans=True, showextrema=True)
+    ax.set_xticks(pos)
+    ax.set_xticklabels(labels)
+    ax.set(title='Violin plot')
+    ax.legend()
+    pyscript.write('violinplot_show', fig)
+
+def lineplot(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    labels = []
+    selectOptions = line_y.selectedOptions
+    for i in range(selectOptions.length):
+        labels.append(selectOptions[i].value)
+    for label in labels:
+        ax.plot(df[Element('line_x').element.value], df[label], label=label)
+    ax.set(title='Line plot')
+    ax.legend()
+    pyscript.write('lineplot_show', fig)
+
+def qqplot(event):
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots()
+    st.probplot(df[Element('qq_column').element.value], dist="norm", plot=ax)
+    ax.set(title='Q-Q plot')
+    ax.legend()
+    pyscript.write('qqplot_show', fig)
+
+
+# fileinput setting
+fileInput = pn.widgets.FileInput(accept='.csv')
+DisplayButton = pn.widgets.Button(name='Display', button_type = 'primary')
+
+# Display setting
+table = pn.widgets.Tabulator(pagination='remote', page_size=10)
+table_describe = pn.widgets.Tabulator(pagination='remote', page_size=12)
+table_groupby = pn.widgets.Tabulator(pagination='remote', page_size=10)
+# hide pagination 'First, Prev [1][2][3] Next, Last'
+document.getElementById('table').style.display = 'none'
+document.getElementById('table_describe').style.display = 'none'
+document.getElementById('table_groupby').style.display = 'none'
+
+# buttons setting
+DescribeButton = pn.widgets.Button(name='Describe', button_type = 'primary')
+GroupbyButton = pn.widgets.Button(name='Groupby', button_type = 'primary')
+ScatterButton = pn.widgets.Button(name='Scatter plot', button_type = 'primary')
+PieButton = pn.widgets.Button(name='Pie chart', button_type = 'primary')
+HistoButton = pn.widgets.Button(name='Histogram', button_type = 'primary')
+BoxButton = pn.widgets.Button(name='Box plot', button_type = 'primary')
+ViolinButton = pn.widgets.Button(name='Violin plot', button_type = 'primary')
+LineButton = pn.widgets.Button(name='Line plot', button_type = 'primary')
+QQButton = pn.widgets.Button(name='Q-Q plot', button_type = 'primary')
+
+DisplayButton.on_click(process_file)
+DescribeButton.on_click(describe)
+GroupbyButton.on_click(groupby)
+ScatterButton.on_click(scatter)
+PieButton.on_click(piechart)
+HistoButton.on_click(histogram)
+BoxButton.on_click(boxplot)
+ViolinButton.on_click(violinplot)
+LineButton.on_click(lineplot)
+QQButton.on_click(qqplot)
+
+await show(fileInput, 'fileinput')
+await show(DisplayButton, 'display')
+await show(table, 'table')
+await show(DescribeButton, 'describe')
+await show(table_describe, 'table_describe')
+await show(GroupbyButton, 'groupby')
+await show(table_groupby, 'table_groupby') 
+await show(ScatterButton, 'scatter')
+await show(PieButton, 'piechart')
+await show(HistoButton, 'histogram')
+await show(BoxButton, 'boxplot')
+await show(ViolinButton, 'violinplot')
+await show(LineButton, 'lineplot')
+await show(QQButton, 'qqplot')
+</py-script>
+{% endblock %}
