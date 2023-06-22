@@ -1,6 +1,45 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="ja" prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="ARAN DataScience" />
+    <meta property="og:description" content="CSVファイルを読み込んで簡単なデータ可視化・データ分析をします🐦" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aran1218.github.io/aran-ds" />
+    <meta property="og:image" content="https://aran1218.github.io/aran-ds/static/media/aran-data.png" />
+    <link rel=apple-touch-icon sizes="180x180" href="static/media/apple-touch-icon.png">
+    <link rel=icon type=image/png href="static/media/favicon.png">
+    <link rel="stylesheet" href="static/css/style.css">
+    <script src="static/js/script.js" defer></script>
+    <title>ARAN DataScience</title>
 
-{% block main %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@holoviz/panel@0.13.0/dist/panel.min.js"></script>
+    <script type="text/javascript">
+        Bokeh.set_log_level("info");
+    </script>
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <py-env>
+      - numpy
+      - pandas
+      - panel==0.13.1a2
+      - matplotlib
+      - scipy
+    </py-env>
+</head>
+<body>
+    <header>
+        <h1 class="h1_title">ARAN DataScience 🐦</h1>
+    </header>
     <p>Get started to input a CSV file and push "Display" button.</p>
     <div id="fileinput"></div>
     <div id="display"></div>
@@ -338,4 +377,7 @@ await show(ViolinButton, 'violinplot')
 await show(LineButton, 'lineplot')
 await show(QQButton, 'qqplot')
 </py-script>
-{% endblock %}
+
+    <footer>created by Shunsuke Nara</footer>
+</body>
+</html>
